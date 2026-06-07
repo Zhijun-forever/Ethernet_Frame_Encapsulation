@@ -101,7 +101,7 @@ int parse_arguments(int argc, char* argv[], program_config_t* config)
 
 void print_usage(const char* prog_name)
 {
-    printf("以太网帧封装程序 (EFrame) v1.0.0\n\n");
+    printf("以太网帧封装程序 (EFrame) v1.1.0\n\n");
     printf("用法: %s <输入文件> [选项]\n\n", prog_name);
     printf("选项:\n");
     printf("  -o, --output <文件>    指定输出文件路径（默认: output_frame.bin）\n");

@@ -22,7 +22,9 @@ int main(int argc, char* argv[])
     int parse_result;
     char mac_str[18];
 
+	//初始化控制台编码和显示程序横幅
     console_init();
+	//打印程序横幅
     print_banner();
 
     /* 步骤 1: 初始化 CRC-32 查找表 */
