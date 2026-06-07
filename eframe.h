@@ -18,7 +18,6 @@
   * 常量定义
   * ================================================================ */
 #define MAC_ADDR_LEN         6              //与目的/源 MAC 长度对应
-#define MAC_ADDR_LEN         6              //与目的/源 MAC 长度对应(是不是重复了)
 #define TYPE_LEN             2              //与类型字段长度对应
 #define FCS_LEN              4              //FCS长度(使用CRC32)
 #define FRAME_HEADER_LEN     14             //以太网帧头，目的 MAC(6) + 源 MAC(6) + 类型(2)
