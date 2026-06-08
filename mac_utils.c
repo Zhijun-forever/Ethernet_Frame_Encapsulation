@@ -69,18 +69,20 @@ void print_hex(const char* title, const unsigned char* data, int len)
     printf("\n");
 }
 
+
+//解析 MAC 地址字符串
 int parse_mac_address(const char* str, mac_addr_t* mac)
 {
     unsigned int bytes[MAC_ADDR_LEN];
     int i;
 
     if (str == NULL || mac == NULL) return -1;
-    if (strlen(str) != 17) {
+    if (strlen(str) != 17) {        //6*2 + 5个分隔符
         fprintf(stderr, "错误：MAC 地址长度不正确，应为 17 个字符（XX-XX-XX-XX-XX-XX），当前为 %zu 个字符。\n", strlen(str));
         return -1;
     }
     for (i = 2; i < 17; i += 3) {
-        if (str[i] != '-') {
+        if (str[i] != '-') {        //检查分隔符位置
             fprintf(stderr, "错误：MAC 地址中第 %d 个字符应为 '-'，但实际为 '%c'。\n", i + 1, str[i]);
             return -1;
         }
@@ -101,6 +103,8 @@ int parse_mac_address(const char* str, mac_addr_t* mac)
     return 0;
 }
 
+
+//将 MAC 地址格式化为字符串
 void mac_to_string(const mac_addr_t* mac, char* buf)
 {
     sprintf(buf, "%02X-%02X-%02X-%02X-%02X-%02X",

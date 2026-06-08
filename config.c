@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+//设置默认配置
 void set_default_config(program_config_t* config)
 {
     strcpy(config->input_file, "");
@@ -19,20 +20,26 @@ void set_default_config(program_config_t* config)
     parse_mac_address(DEFAULT_SRC_MAC, &config->src_mac);
 }
 
+
+//解析命令行参数
 int parse_arguments(int argc, char* argv[], program_config_t* config)
 {
     int i;
 
+    //如果没有参数（argc=1，只有程序名），打印用法并返回 1（主函数识别为帮助，正常退出）
     if (argc < 2) {
         print_usage(argv[0]);
         return 1;   /* 请求帮助，正常退出 */
     }
 
+    
     for (i = 1; i < argc; i++) {
+        //处理 -h 或 --help，打印帮助并返回 1
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_usage(argv[0]);
             return 1;
         }
+        //-o 或 --output：取下一个参数作为输出文件名。使用 strncpy 限制长度，防止溢出，并确保结尾 \0
         else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output") == 0) {
             if (i + 1 < argc) {
                 strncpy(config->output_file, argv[++i], sizeof(config->output_file) - 1);
@@ -43,6 +50,7 @@ int parse_arguments(int argc, char* argv[], program_config_t* config)
                 return -1;
             }
         }
+        //--dst：解析 MAC 地址，失败返回 -1
         else if (strcmp(argv[i], "--dst") == 0) {
             if (i + 1 < argc) {
                 if (parse_mac_address(argv[++i], &config->dst_mac) != 0)
@@ -53,6 +61,7 @@ int parse_arguments(int argc, char* argv[], program_config_t* config)
                 return -1;
             }
         }
+        //--dst：解析 MAC 地址，失败返回 -1
         else if (strcmp(argv[i], "--src") == 0) {
             if (i + 1 < argc) {
                 if (parse_mac_address(argv[++i], &config->src_mac) != 0)
@@ -63,6 +72,7 @@ int parse_arguments(int argc, char* argv[], program_config_t* config)
                 return -1;
             }
         }
+        //--type：将下一个参数作为十六进制字符串转换成整数，检查范围 0~65535，存入 eth_type
         else if (strcmp(argv[i], "--type") == 0) {
             if (i + 1 < argc) {
                 char* endptr;
@@ -78,13 +88,17 @@ int parse_arguments(int argc, char* argv[], program_config_t* config)
                 return -1;
             }
         }
+
+        //如果当前参数不是以 - 开头（即不是选项），则视为输入文件名
         else if (argv[i][0] != '-') {
             strncpy(config->input_file, argv[i], sizeof(config->input_file) - 1);
             config->input_file[sizeof(config->input_file) - 1] = '\0';
         }
+        //--stdin：设置标志，表示从标准输入读取数据
         else if (strcmp(argv[i], "--stdin") == 0) {
             config->use_stdin = 1;
         }
+        //未知选项报错
         else {
             fprintf(stderr, "错误：未知选项 '%s'。使用 -h 查看帮助。\n", argv[i]);
             return -1;
@@ -99,6 +113,7 @@ int parse_arguments(int argc, char* argv[], program_config_t* config)
     return 0;
 }
 
+//打印帮助信息
 void print_usage(const char* prog_name)
 {
     printf("以太网帧封装程序 (EFrame) v1.1.0\n\n");

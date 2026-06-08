@@ -6,12 +6,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "data_io.h"
 
+//从文件读取二进制数据
 unsigned char* read_data_from_file(const char* filename, int* data_len)
 {
     FILE* fp;
     long  file_size;
     unsigned char* buffer;
 
+
+    //以二进制只读方式打开文件。如果失败（文件不存在或权限问题），打印错误并返回 NULL
     *data_len = 0;
     fp = fopen(filename, "rb");
     if (fp == NULL) {
@@ -19,19 +22,21 @@ unsigned char* read_data_from_file(const char* filename, int* data_len)
         return NULL;
     }
 
+    //fseek(fp, 0, SEEK_END) 将文件指针移动到文件末尾。如果失败（例如文件是管道或设备），报错并关闭文件
     if (fseek(fp, 0, SEEK_END) != 0) {
         fprintf(stderr, "错误：无法读取输入文件 '%s'，请检查文件权限。\n", filename);
         fclose(fp);
         return NULL;
     }
 
+    //ftell 获取当前文件位置（即文件大小，因为我们在末尾）如果返回负数表示出错
     file_size = ftell(fp);
     if (file_size < 0) {
         fprintf(stderr, "错误：无法读取输入文件 '%s'，请检查文件权限。\n", filename);
         fclose(fp);
         return NULL;
     }
-    rewind(fp);
+    rewind(fp);     //将文件指针重置到开头，准备读取
 
     /* 提前检查文件是否超过最大数据长度 */
     if (file_size > DATA_MAX_LEN) {
@@ -41,6 +46,7 @@ unsigned char* read_data_from_file(const char* filename, int* data_len)
         return NULL;
     }
 
+    //分配内存：文件大小 + 最小填充长度（46） + 1（多分配一点以防万一）
     buffer = (unsigned char*)malloc((size_t)(file_size + DATA_MIN_LEN + 1));
     if (buffer == NULL) {
         fprintf(stderr, "错误：内存分配失败。\n");
@@ -48,6 +54,7 @@ unsigned char* read_data_from_file(const char* filename, int* data_len)
         return NULL;
     }
 
+    //  如果文件是空的，直接返回 buffer（里面没有数据，但已分配空间）data_len 设为 0
     if (file_size == 0) {
         printf("提示：输入文件为空（0 字节），将全部填充 0x00。\n");
         fclose(fp);
@@ -55,6 +62,8 @@ unsigned char* read_data_from_file(const char* filename, int* data_len)
         return buffer;
     }
 
+    
+    //读取整个文件到 buffer,fread 返回实际读取的字节数，如果与 file_size 不符（通常因为文件被截断或权限问题），报错并释放内存
     *data_len = (int)fread(buffer, 1, (size_t)file_size, fp);
     if (*data_len != file_size) {
         fprintf(stderr, "错误：无法读取输入文件 '%s'，请检查文件权限。\n", filename);
@@ -63,17 +72,20 @@ unsigned char* read_data_from_file(const char* filename, int* data_len)
         return NULL;
     }
 
+    //关闭文件，返回 buffer
     fclose(fp);
     return buffer;
 }
 
+
+//从标准输入读取十六进制字符串
 unsigned char* read_data_from_stdin(int* data_len)
 {
-    char line[8192];   /* 足够容纳最长输入 */
+    char line[8192];   /* 足够容纳最长输入 存储用户输入的一行文本（最多 8192 字符）*/
     unsigned char* buffer = NULL;
-    int i, buf_index = 0;
-    int nibble_count = 0;
-    unsigned char current_byte = 0;
+    int i, buf_index = 0;   //buffer 的当前写入位置
+    int nibble_count = 0;   //0 表示正在等待半字节的高位，1 表示已经有一个高位，正在等待低位
+    unsigned char current_byte = 0;     //暂存正在组装的那个字节
 
     *data_len = 0;
 
@@ -154,6 +166,8 @@ unsigned char* read_data_from_stdin(int* data_len)
     return buffer;
 }
 
+
+//填充数据到最小帧长
 int pad_data(unsigned char* data, int data_len, int max_len)
 {
     int pad_count;
