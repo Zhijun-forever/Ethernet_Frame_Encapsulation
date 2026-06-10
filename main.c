@@ -12,6 +12,24 @@
 #include "data_io.h"
 #include "frame.h"
 
+/**
+  * @brief 程序主入口
+  *
+  * 执行流程：
+  *   1. 初始化 CRC 查找表
+  *   2. 设置默认配置
+  *   3. 解析命令行参数
+  *   4. 读取输入文件
+  *   5. 显示原始数据
+  *   6. 数据长度检查与填充
+  *   7. 构建以太网帧
+  *   8. 显示完整帧
+  *   9. 保存到输出文件
+  *
+  * @param argc  命令行参数个数
+  * @param argv  命令行参数数组
+  * @return      0: 成功, 负数: 错误码
+  */
 int main(int argc, char* argv[])
 {
     program_config_t config;
